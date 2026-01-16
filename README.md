@@ -1,41 +1,13 @@
-Here's a polished README.md with proper markdown formatting, sections, and styling:
-
-```markdown
 # 🛣️ CDO-MALAYBALAY Tollgate Management System
 
 **A comprehensive RFID & Cash Tollgate Management System** built with HTML, CSS, JavaScript, and Firebase that simulates a real-world tollgate payment system for the CDO-MALAYBALAY route. This system handles both RFID card payments and cash transactions with vehicle classification and real-time database management.
 
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-A22846?style=for-the-badge&logo=raspberry-pi&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+<p align="center">
+  <a href="https://youtu.be/0_oPuoF0DaA" target="_blank">
+    <img src="https://img.youtube.com/vi/0_oPuoF0DaA/maxresdefault.jpg" alt="Watch the demo video" width="800" />
+  </a>
+</p>
 
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- **Firebase account** with Realtime Database
-- **Raspberry Pi** with GPIO setup (optional for hardware)
-- Modern web browser
-
-### Installation
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/tollgate-system.git
-
-# Navigate to project directory
-cd tollgate-system
-
-# Open in browser
-open index.html
-```
-
-**Live Demo:** [Add your deployment link here]
-
----
 
 ## ✨ Key Features
 
@@ -72,8 +44,6 @@ open index.html
 - **Admin Control Panel** – Total cards & balance statistics, card management
 - **Transaction History** – Filterable logs, RFID vs Cash analytics, export capabilities
 
----
-
 ## 🛠️ Technology Stack
 
 ### **Frontend**
@@ -90,8 +60,6 @@ open index.html
 ### **External APIs**
 - **Raspberry Pi GPIO** – Hardware gate control
 - **RFID Reader API** – Card scanning integration
-
----
 
 ## 📊 Database Structure
 
@@ -139,46 +107,7 @@ notifications/{notificationId}/
 └── processed
 ```
 
----
-
-## 🔧 Setup & Configuration
-
-### **1. Firebase Setup**
-```javascript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-```
-
-### **2. Enable Authentication**
-1. Go to **Firebase Console → Authentication → Sign-in method**
-2. Enable **Email/Password provider**
-
-### **3. Database Security Rules**
-```json
-{
-  "rules": {
-    "users": {
-      "$userId": {
-        ".read": "$userId === auth.uid",
-        ".write": "$userId === auth.uid"
-      }
-    },
-    "rfidCards": {
-      ".read": "auth != null",
-      ".write": "auth != null"
-    }
-  }
-}
-```
-
----
+## 🔧 Setup
 
 ## 🚦 System Workflow
 
@@ -189,8 +118,6 @@ const firebaseConfig = {
 5. **🚪 Gate Control** → Automated gate opening on successful payment
 6. **📋 Transaction Recording** → All activities logged in real-time
 7. **👨‍💼 Admin Management** → Monitor, manage, and control system
-
----
 
 ## 🎯 Use Cases
 
@@ -211,8 +138,6 @@ const firebaseConfig = {
 - ⚙️ **System configuration**
 - 🗄️ **Database maintenance**
 - 🔒 **Security monitoring**
-
----
 
 ## ⭐ Features & Benefits
 
@@ -240,8 +165,6 @@ const firebaseConfig = {
 - 🌐 **Secure API endpoints**
 - 🛡️ **XSS protection**
 
----
-
 ## 📚 Learning Outcomes
 
 This project demonstrates:
@@ -254,65 +177,7 @@ This project demonstrates:
 - 🎨 **Responsive UI/UX design**
 - 📋 **Project management** from concept to deployment
 
-**Perfect for:** Computer Science projects, IoT demonstrations, Payment system simulations, Hardware-software integration studies, and Real-time database applications.
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** to the branch (`git push origin feature/AmazingFeature`)
-5. **Open** a Pull Request
-
-For major changes, please open an issue first to discuss what you would like to change.
-
----
-
-## 📄 License
-
-This project is **open-source** and available under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
-
 ## 📞 Contact
 
 **📧 Email:** casidar.alinor1017@gmail.com  
 **💻 GitHub:** (https://github.com/alinorcasidar)
-
----
-
-**⭐ If you find this project useful, please give it a star on GitHub!**
-```
-
-## 📋 **Markdown Formatting Used:**
-
-### **Headers:**
-- `# Main Title` (H1)
-- `## Section Title` (H2)
-- `### Subsection Title` (H3)
-
-### **Styling:**
-- **Bold Text:** `**text**`
-- *Italic Text:* `*text*`
-- **Lists:** `-` for bullet points
-- **Tables:** Using pipe `|` syntax
-- **Code Blocks:** ``` ``` with language specification
-- **Horizontal Rules:** `---` or `***`
-
-### **Special Elements:**
-- **Badges:** Using shields.io for tech stack
-- **Emojis:** For visual appeal
-- **Links:** `[text](url)`
-- **Tables:** For comparison/features
-- **Command blocks:** For installation steps
-
-This formatting makes your README:
-1. **Professional** and well-organized
-2. **Easy to read** with clear sections
-3. **Visually appealing** with badges and emojis
-4. **Informative** with proper documentation
-5. **Interactive** with tables and code blocks
