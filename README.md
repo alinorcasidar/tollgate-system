@@ -5,38 +5,6 @@ Here's a polished README.md with proper markdown formatting, sections, and styli
 
 **A comprehensive RFID & Cash Tollgate Management System** built with HTML, CSS, JavaScript, and Firebase that simulates a real-world tollgate payment system for the CDO-MALAYBALAY route. This system handles both RFID card payments and cash transactions with vehicle classification and real-time database management.
 
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-A22846?style=for-the-badge&logo=raspberry-pi&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- **Firebase account** with Realtime Database
-- **Raspberry Pi** with GPIO setup (optional for hardware)
-- Modern web browser
-
-### Installation
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/tollgate-system.git
-
-# Navigate to project directory
-cd tollgate-system
-
-# Open in browser
-open index.html
-```
-
-**Live Demo:** [Add your deployment link here]
-
----
-
 ## ✨ Key Features
 
 ### 🔐 **Authentication & Security**
