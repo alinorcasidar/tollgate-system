@@ -8,7 +8,6 @@
   </a>
 </p>
 
-
 ## ✨ Key Features
 
 ### 🔐 **Authentication & Security**
