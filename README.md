@@ -1,6 +1,3 @@
-Here's a polished README.md with proper markdown formatting, sections, and styling:
-
-```markdown
 # 🛣️ CDO-MALAYBALAY Tollgate Management System
 
 **A comprehensive RFID & Cash Tollgate Management System** built with HTML, CSS, JavaScript, and Firebase that simulates a real-world tollgate payment system for the CDO-MALAYBALAY route. This system handles both RFID card payments and cash transactions with vehicle classification and real-time database management.
