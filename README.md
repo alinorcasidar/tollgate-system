@@ -37,8 +37,6 @@
 - **Admin Control Panel** – Total cards & balance statistics, card management
 - **Transaction History** – Filterable logs, RFID vs Cash analytics, export capabilities
 
----
-
 ## 🛠️ Technology Stack
 
 ### **Frontend**
@@ -55,8 +53,6 @@
 ### **External APIs**
 - **Raspberry Pi GPIO** – Hardware gate control
 - **RFID Reader API** – Card scanning integration
-
----
 
 ## 📊 Database Structure
 
@@ -104,8 +100,6 @@ notifications/{notificationId}/
 └── processed
 ```
 
----
-
 ## 🔧 Setup & Configuration
 
 ### **1. Firebase Setup**
@@ -143,8 +137,6 @@ const firebaseConfig = {
 }
 ```
 
----
-
 ## 🚦 System Workflow
 
 1. **📝 User Registration** → Create account with email/password
@@ -154,8 +146,6 @@ const firebaseConfig = {
 5. **🚪 Gate Control** → Automated gate opening on successful payment
 6. **📋 Transaction Recording** → All activities logged in real-time
 7. **👨‍💼 Admin Management** → Monitor, manage, and control system
-
----
 
 ## 🎯 Use Cases
 
@@ -176,8 +166,6 @@ const firebaseConfig = {
 - ⚙️ **System configuration**
 - 🗄️ **Database maintenance**
 - 🔒 **Security monitoring**
-
----
 
 ## ⭐ Features & Benefits
 
@@ -205,8 +193,6 @@ const firebaseConfig = {
 - 🌐 **Secure API endpoints**
 - 🛡️ **XSS protection**
 
----
-
 ## 📚 Learning Outcomes
 
 This project demonstrates:
@@ -218,9 +204,6 @@ This project demonstrates:
 - 🔐 **User authentication & authorization**
 - 🎨 **Responsive UI/UX design**
 - 📋 **Project management** from concept to deployment
-
----
-
 
 ## 📞 Contact
 
