@@ -272,47 +272,7 @@ For major changes, please open an issue first to discuss what you would like to 
 
 ---
 
-## 📄 License
-
-This project is **open-source** and available under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
-
 ## 📞 Contact
 
 **📧 Email:** casidar.alinor1017@gmail.com  
 **💻 GitHub:** (https://github.com/alinorcasidar)
-
----
-
-**⭐ If you find this project useful, please give it a star on GitHub!**
-```
-
-## 📋 **Markdown Formatting Used:**
-
-### **Headers:**
-- `# Main Title` (H1)
-- `## Section Title` (H2)
-- `### Subsection Title` (H3)
-
-### **Styling:**
-- **Bold Text:** `**text**`
-- *Italic Text:* `*text*`
-- **Lists:** `-` for bullet points
-- **Tables:** Using pipe `|` syntax
-- **Code Blocks:** ``` ``` with language specification
-- **Horizontal Rules:** `---` or `***`
-
-### **Special Elements:**
-- **Badges:** Using shields.io for tech stack
-- **Emojis:** For visual appeal
-- **Links:** `[text](url)`
-- **Tables:** For comparison/features
-- **Command blocks:** For installation steps
-
-This formatting makes your README:
-1. **Professional** and well-organized
-2. **Easy to read** with clear sections
-3. **Visually appealing** with badges and emojis
-4. **Informative** with proper documentation
-5. **Interactive** with tables and code blocks
