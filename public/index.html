@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pampanga Tollgate System - Live Firebase</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ====== RESET & BASE STYLES ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* ====== HEADER ====== */
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-text h1 {
+            font-size: 2.3rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-text p {
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+        
+        .toll-price {
+            background-color: #fbbf24;
+            color: #1e3a8a;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .user-info {
+            text-align: right;
+            color: white;
+        }
+        
+        /* ====== FIREBASE STATUS ====== */
+        .firebase-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        
+        .status-connected {
+            background-color: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+        
+        .status-disconnected {
+            background-color: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        /* ====== TABS ====== */
+        .tabs-nav {
+            display: flex;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            background: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #6b7280;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background-color: #f3f4f6;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* ====== TOLLGATE SYSTEM ====== */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .entrance-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-title {
+            color: #1e3a8a;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+        }
+        
+        .gate-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 140px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .gate-closed {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 3px solid #dc2626;
+        }
+        
+        .gate-open {
+            background-color: #d1fae5;
+            color: #059669;
+            border: 3px solid #059669;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+        }
+        
+        /* ====== FORM ELEMENTS ====== */
+        .form-group {
+            margin-bottom: 22px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #3b82f6;
+            outline: none;
+        }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+        
+        .input-with-icon input {
+            padding-left: 45px;
+        }
+        
+        /* ====== BUTTONS ====== */
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        /* ====== MESSAGES ====== */
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success-message {
+            background-color: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+        
+        .error-message {
+            background-color: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .info-message {
+            background-color: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+        }
+        
+        /* ====== ADMIN PANEL ====== */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .stat-icon.users { background-color: #10b981; }
+        .stat-icon.balance { background-color: #3b82f6; }
+        .stat-icon.active { background-color: #8b5cf6; }
+        .stat-icon.blocked { background-color: #ef4444; }
+        
+        .admin-main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1100px) {
+            .admin-main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card-management, .cards-list {
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        
+        .admin-tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 25px;
+        }
+        
+        .admin-tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .admin-tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        /* ====== RFID CARD DISPLAY ====== */
+        .card-preview {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 15px rgba(30, 58, 138, 0.2);
+        }
+        
+        .cards-list-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .rfid-card-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .rfid-card-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.1);
+        }
+        
+        .rfid-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .rfid-card-id {
+            font-weight: 700;
+            color: #1e3a8a;
+            font-size: 1.1rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+        
+        .rfid-card-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* ====== ACTIVITY LOG ====== */
+        .status-log {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .log-entry {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.95rem;
+        }
+        
+        .log-time {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        
+        /* ====== FOOTER ====== */
+        footer {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Firebase Status Indicator -->
+        <div id="firebaseStatus" class="firebase-status status-disconnected">
+            <i class="fas fa-circle" id="statusIcon"></i>
+            <span id="statusText">Connecting to Firebase...</span>
+        </div>
+        
+        <!-- Main Application -->
+        <div id="mainApp">
+            <header>
+                <div class="header-content">
+                    <div class="header-text">
+                        <h1><i class="fas fa-road"></i> Pampanga Tollgate System</h1>
+                        <p>RFID & Cash Payment System with Firebase Realtime Database</p>
+                        <div class="toll-price">
+                            <i class="fas fa-tag"></i> Toll Fee: ₱156.00
+                        </div>
+                    </div>
+                    <div class="user-info">
+                        <div id="userEmail" style="font-weight: 600;">Admin User</div>
+                        <div style="font-size: 0.9rem;">Project: <strong>tollgate-13ae4</strong></div>
+                        <button class="btn btn-secondary" id="logoutBtn" style="margin-top: 10px;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Tabs Navigation -->
+            <div class="tabs-nav">
+                <button class="tab-btn active" data-tab="tollgate">
+                    <i class="fas fa-road"></i> Tollgate System
+                </button>
+                <button class="tab-btn" data-tab="admin">
+                    <i class="fas fa-cog"></i> Admin Panel
+                </button>
+                <button class="tab-btn" data-tab="transactions">
+                    <i class="fas fa-history"></i> Transactions
+                </button>
+            </div>
+            
+            <!-- Tollgate System Tab -->
+            <div id="tollgate" class="tab-content active">
+                <div class="main-content">
+                    <!-- RFID Entrance Section -->
+                    <section class="entrance-section">
+                        <h2 class="section-title"><i class="fas fa-id-card"></i> RFID Entrance (Entrance 1)</h2>
+                        
+                        <div class="gate-indicator gate-closed" id="rfidGateIndicator">
+                            <i class="fas fa-times-circle"></i> GATE CLOSED
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rfidCardInput">Scan or Enter RFID Card ID:</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-credit-card"></i>
+                                <input type="text" id="rfidCardInput" placeholder="Enter 8-digit RFID Card ID" maxlength="8">
+                            </div>
+                            <button class="btn btn-secondary" id="scanRFIDBtn" style="margin-top: 10px; width: 100%;">
+                                <i class="fas fa-camera"></i> Simulate RFID Scan
+                            </button>
+                        </div>
+                        
+                        <div class="message info-message" id="cardInfoMessage" style="display: none;">
+                            <div id="cardInfoContent">
+                                <!-- Card info will be displayed here -->
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="processRFIDBtn" style="width: 100%;">
+                            <i class="fas fa-check-circle"></i> Process RFID Payment (₱156)
+                        </button>
+                        
+                        <div class="message success-message" id="rfidSuccessMessage" style="display: none;">
+                            <i class="fas fa-check-circle"></i> Payment successful! Gate opened. Receipt sent to email.
+                        </div>
+                        
+                        <div class="message error-message" id="rfidErrorMessage" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
+                        </div>
+                    </section>
+                    
+                    <!-- Cash Entrance Section -->
+                    <section class="entrance-section">
+                        <h2 class="section-title"><i class="fas fa-money-bill-wave"></i> Cash Entrance (Entrance 2)</h2>
+                        
+                        <div class="gate-indicator gate-closed" id="cashGateIndicator">
+                            <i class="fas fa-times-circle"></i> GATE CLOSED
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cashAmount">Enter Payment Amount (₱):</label>
+                            <input type="number" id="cashAmount" placeholder="Enter amount (minimum ₱156)" min="156" step="1" value="200">
+                        </div>
+                        
+                        <button class="btn btn-primary" id="processCashBtn" style="width: 100%;">
+                            <i class="fas fa-calculator"></i> Process Cash Payment
+                        </button>
+                        
+                        <div class="message info-message" id="cashReceipt" style="display: none;">
+                            <h4><i class="fas fa-receipt"></i> Payment Receipt</h4>
+                            <div style="background-color: white; padding: 20px; border-radius: 8px; margin-top: 10px; border: 1px dashed #d1d5db;">
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                                    <span>Toll Fee:</span>
+                                    <span>₱156.00</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                                    <span>Amount Paid:</span>
+                                    <span id="amountPaidDisplay">₱0.00</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; font-weight: bold; border-top: 2px solid #1e3a8a; margin-top: 5px; padding-top: 10px;">
+                                    <span>Change:</span>
+                                    <span id="changeDisplay">₱0.00</span>
+                                </div>
+                            </div>
+                            <p style="text-align: center; margin-top: 15px;">
+                                <i class="fas fa-check-circle"></i> Payment processed successfully
+                            </p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            
+            <!-- Admin Panel Tab -->
+            <div id="admin" class="tab-content">
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon users">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalCards">0</h3>
+                            <p>Total RFID Cards</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon balance">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>₱<span id="totalBalance">0</span></h3>
+                            <p>Total Balance</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon active">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="activeCards">0</h3>
+                            <p>Active Cards</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon blocked">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="blockedCards">0</h3>
+                            <p>Inactive Cards</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-main-content">
+                    <div class="card-management">
+                        <h2 class="section-title"><i class="fas fa-edit"></i> RFID Card Management</h2>
+                        
+                        <div class="admin-tabs">
+                            <div class="admin-tab active" data-admin-tab="add-card">Add New Card</div>
+                            <div class="admin-tab" data-admin-tab="edit-card">Edit Card</div>
+                            <div class="admin-tab" data-admin-tab="add-balance">Add Balance</div>
+                        </div>
+                        
+                        <!-- Add New Card Tab -->
+                        <div id="add-card" class="admin-tab-content active">
+                            <div class="message success-message" id="addSuccessMessage" style="display: none;">
+                                <i class="fas fa-check-circle"></i> RFID card added successfully!
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="newCardId">RFID Card ID *</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-id-card"></i>
+                                    <input type="text" id="newCardId" placeholder="Enter 8-digit ID" maxlength="8">
+                                </div>
+                                <button class="btn btn-secondary" id="generateCardId" style="margin-top: 10px; width: auto;">
+                                    <i class="fas fa-random"></i> Generate Random ID
+                                </button>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cardHolder">Card Holder Name *</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-user"></i>
+                                    <input type="text" id="cardHolder" placeholder="Enter card holder name">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cardEmail">Email Address *</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-envelope"></i>
+                                    <input type="email" id="cardEmail" placeholder="Enter email for receipts">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="initialBalance">Initial Balance (₱) *</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-wallet"></i>
+                                    <input type="number" id="initialBalance" placeholder="Enter initial balance" min="100" value="500">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cardType">Card Type</label>
+                                <select id="cardType">
+                                    <option value="regular">Regular</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="vip">VIP</option>
+                                    <option value="employee">Employee</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="vehicleInfo">Vehicle Information (Optional)</label>
+                                <textarea id="vehicleInfo" rows="3" placeholder="e.g., Toyota Innova, Plate No: ABC 123"></textarea>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="addCardBtn" style="width: 100%;">
+                                <i class="fas fa-plus-circle"></i> Add New RFID Card to Database
+                            </button>
+                        </div>
+                        
+                        <!-- Edit Card Tab -->
+                        <div id="edit-card" class="admin-tab-content">
+                            <div class="message success-message" id="editSuccessMessage" style="display: none;">
+                                <i class="fas fa-check-circle"></i> RFID card updated successfully!
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="selectCardToEdit">Select RFID Card to Edit:</label>
+                                <select id="selectCardToEdit">
+                                    <option value="">Select a card...</option>
+                                </select>
+                            </div>
+                            
+                            <div id="editCardForm" style="display: none;">
+                                <div class="form-group">
+                                    <label for="editCardHolder">Card Holder Name *</label>
+                                    <input type="text" id="editCardHolder">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editCardEmail">Email Address *</label>
+                                    <input type="email" id="editCardEmail">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editCardType">Card Type</label>
+                                    <select id="editCardType">
+                                        <option value="regular">Regular</option>
+                                        <option value="premium">Premium</option>
+                                        <option value="vip">VIP</option>
+                                        <option value="employee">Employee</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editCardStatus">Card Status</label>
+                                    <select id="editCardStatus">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="blocked">Blocked</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editVehicleInfo">Vehicle Information</label>
+                                    <textarea id="editVehicleInfo" rows="3"></textarea>
+                                </div>
+                                
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-success" id="updateCardBtn" style="flex: 1;">
+                                        <i class="fas fa-save"></i> Update Card
+                                    </button>
+                                    <button class="btn btn-danger" id="deleteCardBtn" style="flex: 1;">
+                                        <i class="fas fa-trash"></i> Delete Card
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Balance Tab -->
+                        <div id="add-balance" class="admin-tab-content">
+                            <div class="message success-message" id="balanceSuccessMessage" style="display: none;">
+                                <i class="fas fa-check-circle"></i> Balance added successfully!
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="selectCardForBalance">Select RFID Card:</label>
+                                <select id="selectCardForBalance">
+                                    <option value="">Select a card...</option>
+                                </select>
+                            </div>
+                            
+                            <div id="balanceCardInfo" style="display: none;">
+                                <div class="card-preview">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                                        <div style="background-color: rgba(255, 255, 255, 0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;">
+                                            <span id="balanceCardType">Regular</span>
+                                        </div>
+                                        <div class="rfid-card-status status-active" id="balanceCardStatus">Active</div>
+                                    </div>
+                                    <div style="font-size: 2.2rem; font-weight: 700; text-align: center; margin: 20px 0;">
+                                        Current Balance: ₱<span id="currentBalance">0.00</span>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                                        <div>
+                                            <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">Card ID</p>
+                                            <p style="font-weight: 600;" id="balanceCardId">A3F5892C</p>
+                                        </div>
+                                        <div>
+                                            <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">Card Holder</p>
+                                            <p style="font-weight: 600;" id="balanceCardHolder">John Doe</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="addAmount">Amount to Add (₱) *</label>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        <input type="number" id="addAmount" placeholder="Enter amount to add" min="100" step="100" value="500">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="transactionNotes">Transaction Notes (Optional)</label>
+                                    <textarea id="transactionNotes" rows="2" placeholder="e.g., Top-up via bank deposit"></textarea>
+                                </div>
+                                
+                                <button class="btn btn-primary" id="addBalanceBtn" style="width: 100%;">
+                                    <i class="fas fa-plus-circle"></i> Add Balance to Card
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cards-list">
+                        <h2 class="section-title"><i class="fas fa-list"></i> All RFID Cards</h2>
+                        
+                        <div class="search-bar">
+                            <div class="input-with-icon">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchCards" placeholder="Search by card ID, name, or email...">
+                            </div>
+                        </div>
+                        
+                        <div class="cards-list-container" id="cardsListContainer">
+                            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                                <i class="fas fa-id-card fa-3x" style="margin-bottom: 20px;"></i>
+                                <p>Loading RFID cards from Firebase...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Transactions Tab -->
+            <div id="transactions" class="tab-content">
+                <div class="entrance-section">
+                    <h2 class="section-title"><i class="fas fa-history"></i> Transaction History</h2>
+                    <div class="status-log" id="transactionsLog">
+                        <div style="text-align: center; padding: 40px; color: #6b7280;">
+                            <i class="fas fa-history fa-3x" style="margin-bottom: 20px;"></i>
+                            <p>Loading transactions from Firebase...</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" id="clearTransactionsBtn" style="margin-top: 15px;">
+                        <i class="fas fa-trash"></i> Clear All Transactions
+                    </button>
+                    <button class="btn btn-primary" id="refreshTransactionsBtn" style="margin-top: 15px; margin-left: 10px;">
+                        <i class="fas fa-sync"></i> Refresh Transactions
+                    </button>
+                    <button class="btn btn-success" id="addSampleTransactionsBtn" style="margin-top: 15px; margin-left: 10px;">
+                        <i class="fas fa-plus"></i> Add Sample Data
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Tollgate System with Firebase Integration v3.0 | Project: tollgate-13ae4 | &copy; 2023 Pampanga Tollgate System</p>
+        </footer>
+    </div>
+
+    <!-- ====== FIREBASE AND APPLICATION CODE ====== -->
+    <script>
+        // ====== FIREBASE CONFIGURATION ======
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8pWwSVB71e-Ks1jYOHQe8_T1zbGYgD_o",
+            authDomain: "tollgate-13ae4.firebaseapp.com",
+            databaseURL: "https://tollgate-13ae4-default-rtdb.firebaseio.com",
+            projectId: "tollgate-13ae4",
+            storageBucket: "tollgate-13ae4.firebasestorage.app",
+            messagingSenderId: "20251525602",
+            appId: "1:20251525602:web:220170e5c785195ca139bb",
+            measurementId: "G-GT76S75F9F"
+        };
+        
+        // ====== INITIALIZE FIREBASE ======
+        let app, auth, database, analytics;
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            database = firebase.database();
+            analytics = firebase.analytics();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+        
+        // ====== APPLICATION VARIABLES ======
+        let currentUser = null;
+        let rfidCards = {};
+        let transactions = {};
+        const tollFee = 156;
+        let gateOpenTimeout = null;
+        
+        // ====== DOM ELEMENTS ======
+        // These will be initialized when DOM is ready
+        let firebaseStatus, statusIcon, statusText, userEmail, logoutBtn;
+        let tabBtns, tabContents, adminTabs, adminTabContents;
+        let rfidGateIndicator, cashGateIndicator, rfidCardInput, scanRFIDBtn;
+        let cardInfoMessage, cardInfoContent, processRFIDBtn, rfidSuccessMessage;
+        let rfidErrorMessage, errorText, cashAmount, processCashBtn, cashReceipt;
+        let amountPaidDisplay, changeDisplay, totalCardsElement, totalBalanceElement;
+        let activeCardsElement, blockedCardsElement, cardsListContainer, searchCardsInput;
+        let generateCardIdBtn, newCardIdInput, cardHolderInput, cardEmailInput;
+        let initialBalanceInput, cardTypeSelect, vehicleInfoInput, addCardBtn;
+        let addSuccessMessage, selectCardToEdit, editCardForm, editCardHolder;
+        let editCardEmail, editCardType, editCardStatus, editVehicleInfo;
+        let updateCardBtn, deleteCardBtn, editSuccessMessage, selectCardForBalance;
+        let balanceCardInfo, balanceCardType, balanceCardStatus, currentBalanceDisplay;
+        let balanceCardId, balanceCardHolder, addAmountInput, transactionNotesInput;
+        let addBalanceBtn, balanceSuccessMessage, transactionsLog, clearTransactionsBtn;
+        let refreshTransactionsBtn, addSampleTransactionsBtn;
+        
+        // ====== FIREBASE CONNECTION MANAGEMENT ======
+        function monitorFirebaseConnection() {
+            if (!database) {
+                console.error("Database not initialized");
+                updateFirebaseStatus(false, "Firebase not initialized");
+                return;
+            }
+            
+            const connectedRef = database.ref(".info/connected");
+            
+            connectedRef.on("value", function(snap) {
+                if (snap.val() === true) {
+                    updateFirebaseStatus(true, "Connected to Firebase Database");
+                    console.log("Firebase connected successfully!");
+                    
+                    // Load data once connected
+                    loadRFIDCards();
+                    loadTransactions();
+                } else {
+                    updateFirebaseStatus(false, "Disconnected from Firebase");
+                    console.log("Firebase disconnected");
+                }
+            });
+        }
+        
+        function updateFirebaseStatus(connected, message) {
+            if (!firebaseStatus) return;
+            
+            if (connected) {
+                firebaseStatus.className = "firebase-status status-connected";
+                statusIcon.className = "fas fa-check-circle";
+                statusText.textContent = message;
+            } else {
+                firebaseStatus.className = "firebase-status status-disconnected";
+                statusIcon.className = "fas fa-times-circle";
+                statusText.textContent = message;
+            }
+        }
+        
+        // ====== AUTHENTICATION ======
+        function setupAuthentication() {
+            // For demo purposes, auto-login as admin
+            currentUser = {
+                uid: 'demo-admin-user',
+                email: 'admin@tollgate.com',
+                displayName: 'Admin User'
+            };
+            
+            if (userEmail) {
+                userEmail.textContent = currentUser.email;
+            }
+            
+            // Setup logout
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to logout?')) {
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+        
+        // ====== DATA LOADING ======
+        function loadRFIDCards() {
+            if (!database) return;
+            
+            database.ref('rfidCards').on('value', function(snapshot) {
+                rfidCards = snapshot.val() || {};
+                console.log('RFID Cards loaded:', Object.keys(rfidCards).length);
+                
+                updateAdminStats();
+                populateCardsList();
+                populateSelectCards();
+                
+                // If no cards exist, add sample data
+                if (Object.keys(rfidCards).length === 0) {
+                    addSampleRFIDCards();
+                }
+            });
+        }
+        
+        function loadTransactions() {
+            if (!database) return;
+            
+            database.ref('transactions').on('value', function(snapshot) {
+                transactions = snapshot.val() || {};
+                updateTransactionsLog();
+            });
+        }
+        
+        // ====== ADMIN STATISTICS ======
+        function updateAdminStats() {
+            if (!totalCardsElement) return;
+            
+            const cards = Object.values(rfidCards);
+            const totalCards = cards.length;
+            const totalBalance = cards.reduce((sum, card) => sum + (parseFloat(card.balance) || 0), 0);
+            const activeCards = cards.filter(card => card.status === 'active').length;
+            const inactiveCards = cards.filter(card => card.status !== 'active').length;
+            
+            totalCardsElement.textContent = totalCards;
+            totalBalanceElement.textContent = totalBalance.toFixed(2);
+            activeCardsElement.textContent = activeCards;
+            blockedCardsElement.textContent = inactiveCards;
+        }
+        
+        // ====== TOLLGATE SYSTEM FUNCTIONS ======
+        function setupRFIDHandlers() {
+            if (!rfidCardInput) return;
+            
+            // RFID Card Input Handler
+            rfidCardInput.addEventListener('input', function() {
+                const cardId = this.value.toUpperCase().trim();
+                
+                if (cardId.length === 8 && rfidCards[cardId]) {
+                    const card = rfidCards[cardId];
+                    const statusClass = card.status === 'active' ? 'status-active' : 'status-inactive';
+                    
+                    cardInfoContent.innerHTML = `
+                        <p><strong>Card Holder:</strong> ${card.holder}</p>
+                        <p><strong>Balance:</strong> ₱${parseFloat(card.balance).toFixed(2)}</p>
+                        <p><strong>Status:</strong> <span class="rfid-card-status ${statusClass}">${card.status}</span></p>
+                        <p><strong>Vehicle:</strong> ${card.vehicle || 'Not specified'}</p>
+                    `;
+                    cardInfoMessage.style.display = 'block';
+                    if (rfidErrorMessage) rfidErrorMessage.style.display = 'none';
+                } else {
+                    cardInfoMessage.style.display = 'none';
+                    if (cardId.length === 8 && rfidErrorMessage) {
+                        errorText.textContent = 'RFID Card not found in system';
+                        rfidErrorMessage.style.display = 'block';
+                    }
+                }
+            });
+            
+            // Simulate RFID Scan
+            if (scanRFIDBtn) {
+                scanRFIDBtn.addEventListener('click', function() {
+                    const cardIds = Object.keys(rfidCards);
+                    if (cardIds.length > 0) {
+                        const randomCardId = cardIds[Math.floor(Math.random() * cardIds.length)];
+                        rfidCardInput.value = randomCardId;
+                        rfidCardInput.dispatchEvent(new Event('input'));
+                    } else {
+                        alert('No RFID cards in system. Please add cards in Admin Panel first.');
+                    }
+                });
+            }
+            
+            // Process RFID Payment
+            if (processRFIDBtn) {
+                processRFIDBtn.addEventListener('click', processRFIDPayment);
+            }
+            
+            // Process Cash Payment
+            if (processCashBtn) {
+                processCashBtn.addEventListener('click', processCashPayment);
+            }
+        }
+        
+        function processRFIDPayment() {
+            const cardId = rfidCardInput.value.toUpperCase().trim();
+            
+            if (!cardId || cardId.length !== 8) {
+                errorText.textContent = 'Please enter a valid 8-digit RFID Card ID';
+                rfidErrorMessage.style.display = 'block';
+                return;
+            }
+            
+            if (!rfidCards[cardId]) {
+                errorText.textContent = 'RFID Card not found in system';
+                rfidErrorMessage.style.display = 'block';
+                return;
+            }
+            
+            const card = rfidCards[cardId];
+            
+            if (card.status !== 'active') {
+                errorText.textContent = `Card is ${card.status}. Please use another card or contact administrator.`;
+                rfidErrorMessage.style.display = 'block';
+                return;
+            }
+            
+            const currentBalance = parseFloat(card.balance);
+            
+            if (currentBalance < tollFee) {
+                errorText.textContent = `Insufficient balance. Current: ₱${currentBalance.toFixed(2)}, Required: ₱${tollFee.toFixed(2)}`;
+                rfidErrorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Process payment
+            const newBalance = currentBalance - tollFee;
+            
+            database.ref('rfidCards/' + cardId).update({
+                balance: newBalance,
+                lastUsed: new Date().toISOString()
+            }).then(() => {
+                // Record transaction
+                const transactionId = database.ref('transactions').push().key;
+                const transaction = {
+                    id: transactionId,
+                    type: 'rfid',
+                    cardId: cardId,
+                    cardHolder: card.holder,
+                    amount: tollFee,
+                    timestamp: new Date().toISOString(),
+                    newBalance: newBalance,
+                    status: 'success'
+                };
+                
+                database.ref('transactions/' + transactionId).set(transaction);
+                
+                // Show success
+                rfidSuccessMessage.style.display = 'block';
+                rfidErrorMessage.style.display = 'none';
+                
+                // Open gate
+                openGate(rfidGateIndicator);
+                
+                // Reset after 5 seconds
+                setTimeout(() => {
+                    rfidSuccessMessage.style.display = 'none';
+                    rfidCardInput.value = '';
+                    cardInfoMessage.style.display = 'none';
+                }, 5000);
+                
+                console.log(`RFID payment processed for card ${cardId}. New balance: ₱${newBalance}`);
+            }).catch(error => {
+                console.error('Error processing RFID payment:', error);
+                errorText.textContent = 'Error processing payment. Please try again.';
+                rfidErrorMessage.style.display = 'block';
+            });
+        }
+        
+        function processCashPayment() {
+            const amount = parseFloat(cashAmount.value);
+            
+            if (isNaN(amount) || amount < tollFee) {
+                alert(`Minimum payment is ₱${tollFee.toFixed(2)}. Please enter a valid amount.`);
+                return;
+            }
+            
+            const change = amount - tollFee;
+            
+            // Display receipt
+            amountPaidDisplay.textContent = `₱${amount.toFixed(2)}`;
+            changeDisplay.textContent = `₱${change.toFixed(2)}`;
+            cashReceipt.style.display = 'block';
+            
+            // Record transaction
+            const transactionId = database.ref('transactions').push().key;
+            const transaction = {
+                id: transactionId,
+                type: 'cash',
+                amountPaid: amount,
+                change: change,
+                timestamp: new Date().toISOString(),
+                status: 'success'
+            };
+            
+            database.ref('transactions/' + transactionId).set(transaction);
+            
+            // Open gate
+            openGate(cashGateIndicator);
+            
+            // Reset after 5 seconds
+            setTimeout(() => {
+                cashReceipt.style.display = 'none';
+            }, 5000);
+            
+            console.log(`Cash payment processed. Amount: ₱${amount}, Change: ₱${change}`);
+        }
+        
+        // Gate Control Functions
+        function openGate(gateElement) {
+            gateElement.classList.remove('gate-closed');
+            gateElement.classList.add('gate-open');
+            gateElement.innerHTML = '<i class="fas fa-check-circle"></i> GATE OPEN';
+            
+            // Clear any existing timeout
+            if (gateOpenTimeout) {
+                clearTimeout(gateOpenTimeout);
+            }
+            
+            // Close gate after 5 seconds
+            gateOpenTimeout = setTimeout(() => {
+                resetGate(gateElement);
+            }, 5000);
+        }
+        
+        function resetGate(gateElement) {
+            gateElement.classList.remove('gate-open');
+            gateElement.classList.add('gate-closed');
+            gateElement.innerHTML = '<i class="fas fa-times-circle"></i> GATE CLOSED';
+            gateOpenTimeout = null;
+        }
+        
+        // ====== ADMIN PANEL FUNCTIONS ======
+        // Populate cards list
+        function populateCardsList(filter = '') {
+            if (!cardsListContainer) return;
+            
+            cardsListContainer.innerHTML = '';
+            
+            let cardsArray = Object.entries(rfidCards);
+            
+            // Apply filter
+            if (filter) {
+                const searchTerm = filter.toLowerCase();
+                cardsArray = cardsArray.filter(([id, card]) => 
+                    id.toLowerCase().includes(searchTerm) ||
+                    (card.holder && card.holder.toLowerCase().includes(searchTerm)) ||
+                    (card.email && card.email.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            // Sort by card ID
+            cardsArray.sort((a, b) => a[0].localeCompare(b[0]));
+            
+            if (cardsArray.length === 0) {
+                cardsListContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <i class="fas fa-id-card fa-3x" style="margin-bottom: 20px;"></i>
+                        <p>No RFID cards found${filter ? ' matching search' : ''}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Display each card
+            cardsArray.forEach(([cardId, card]) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'rfid-card-item';
+                
+                const statusClass = card.status === 'active' ? 'status-active' : 'status-inactive';
+                const statusText = card.status === 'active' ? 'ACTIVE' : card.status ? card.status.toUpperCase() : 'INACTIVE';
+                
+                cardElement.innerHTML = `
+                    <div class="rfid-card-header">
+                        <div class="rfid-card-id">${cardId}</div>
+                        <div class="rfid-card-status ${statusClass}">${statusText}</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 5px;">Card Holder</p>
+                            <p style="font-weight: 600;">${card.holder || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 5px;">Balance</p>
+                            <p style="font-weight: 600;">₱${parseFloat(card.balance || 0).toFixed(2)}</p>
+                        </div>
+                        <div>
+                            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 5px;">Card Type</p>
+                            <p style="font-weight: 600;">${(card.type || 'regular').toUpperCase()}</p>
+                        </div>
+                        <div>
+                            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 5px;">Email</p>
+                            <p style="font-weight: 600;">${card.email || 'N/A'}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 5px;">Vehicle</p>
+                        <p style="font-weight: 600;">${card.vehicle || 'Not specified'}</p>
+                    </div>
+                `;
+                
+                cardsListContainer.appendChild(cardElement);
+            });
+        }
+        
+        function setupAdminHandlers() {
+            // Search cards
+            if (searchCardsInput) {
+                searchCardsInput.addEventListener('input', function() {
+                    populateCardsList(this.value);
+                });
+            }
+            
+            // Generate random card ID
+            if (generateCardIdBtn) {
+                generateCardIdBtn.addEventListener('click', function() {
+                    const chars = '0123456789ABCDEF';
+                    let id = '';
+                    for (let i = 0; i < 8; i++) {
+                        id += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    newCardIdInput.value = id;
+                });
+            }
+            
+            // Add new RFID card
+            if (addCardBtn) {
+                addCardBtn.addEventListener('click', addNewRFIDCard);
+            }
+            
+            // Load card for editing
+            if (selectCardToEdit) {
+                selectCardToEdit.addEventListener('change', loadCardForEdit);
+            }
+            
+            // Update card
+            if (updateCardBtn) {
+                updateCardBtn.addEventListener('click', updateRFIDCard);
+            }
+            
+            // Delete card
+            if (deleteCardBtn) {
+                deleteCardBtn.addEventListener('click', deleteRFIDCard);
+            }
+            
+            // Load card for balance addition
+            if (selectCardForBalance) {
+                selectCardForBalance.addEventListener('change', loadCardForBalance);
+            }
+            
+            // Add balance to card
+            if (addBalanceBtn) {
+                addBalanceBtn.addEventListener('click', addBalanceToCard);
+            }
+            
+            // Transaction buttons
+            if (clearTransactionsBtn) {
+                clearTransactionsBtn.addEventListener('click', clearAllTransactions);
+            }
+            
+            if (refreshTransactionsBtn) {
+                refreshTransactionsBtn.addEventListener('click', loadTransactions);
+            }
+            
+            if (addSampleTransactionsBtn) {
+                addSampleTransactionsBtn.addEventListener('click', addSampleTransactions);
+            }
+        }
+        
+        // Populate select dropdowns
+        function populateSelectCards() {
+            if (!selectCardToEdit || !selectCardForBalance) return;
+            
+            selectCardToEdit.innerHTML = '<option value="">Select a card...</option>';
+            selectCardForBalance.innerHTML = '<option value="">Select a card...</option>';
+            
+            Object.entries(rfidCards).forEach(([cardId, card]) => {
+                const option1 = document.createElement('option');
+                option1.value = cardId;
+                option1.textContent = `${cardId} - ${card.holder}`;
+                selectCardToEdit.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = cardId;
+                option2.textContent = `${cardId} - ${card.holder}`;
+                selectCardForBalance.appendChild(option2);
+            });
+        }
+        
+        function addNewRFIDCard() {
+            const cardId = newCardIdInput.value.trim().toUpperCase();
+            const holder = cardHolderInput.value.trim();
+            const email = cardEmailInput.value.trim();
+            const balance = parseFloat(initialBalanceInput.value);
+            const type = cardTypeSelect.value;
+            const vehicle = vehicleInfoInput.value.trim();
+            
+            // Validation
+            if (!cardId || cardId.length !== 8) {
+                alert('Please enter a valid 8-digit RFID Card ID');
+                return;
+            }
+            
+            if (!holder || !email || isNaN(balance) || balance < 100) {
+                alert('Please fill all required fields correctly. Minimum balance is ₱100.');
+                return;
+            }
+            
+            // Check if card already exists
+            if (rfidCards[cardId]) {
+                alert('Card ID already exists. Please use a different ID.');
+                return;
+            }
+            
+            // Create card object
+            const newCard = {
+                holder: holder,
+                email: email,
+                balance: balance,
+                type: type,
+                status: 'active',
+                vehicle: vehicle || 'Not specified',
+                dateCreated: new Date().toISOString(),
+                lastUsed: null
+            };
+            
+            // Save to Firebase
+            database.ref('rfidCards/' + cardId).set(newCard)
+                .then(() => {
+                    // Show success message
+                    addSuccessMessage.style.display = 'block';
+                    setTimeout(() => {
+                        addSuccessMessage.style.display = 'none';
+                    }, 3000);
+                    
+                    // Reset form
+                    newCardIdInput.value = '';
+                    cardHolderInput.value = '';
+                    cardEmailInput.value = '';
+                    initialBalanceInput.value = '500';
+                    vehicleInfoInput.value = '';
+                    
+                    console.log('New card added:', cardId);
+                })
+                .catch(error => {
+                    console.error('Error adding card:', error);
+                    alert('Error adding card. Please try again.');
+                });
+        }
+        
+        function loadCardForEdit() {
+            const cardId = this.value;
+            
+            if (!cardId) {
+                editCardForm.style.display = 'none';
+                return;
+            }
+            
+            const card = rfidCards[cardId];
+            if (card) {
+                editCardHolder.value = card.holder || '';
+                editCardEmail.value = card.email || '';
+                editCardType.value = card.type || 'regular';
+                editCardStatus.value = card.status || 'active';
+                editVehicleInfo.value = card.vehicle || '';
+                editCardForm.style.display = 'block';
+            }
+        }
+        
+        function updateRFIDCard() {
+            const cardId = selectCardToEdit.value;
+            
+            if (!cardId) return;
+            
+            const updates = {
+                holder: editCardHolder.value.trim(),
+                email: editCardEmail.value.trim(),
+                type: editCardType.value,
+                status: editCardStatus.value,
+                vehicle: editVehicleInfo.value.trim()
+            };
+            
+            // Validate
+            if (!updates.holder || !updates.email) {
+                alert('Please fill all required fields.');
+                return;
+            }
+            
+            database.ref('rfidCards/' + cardId).update(updates)
+                .then(() => {
+                    editSuccessMessage.style.display = 'block';
+                    setTimeout(() => {
+                        editSuccessMessage.style.display = 'none';
+                    }, 3000);
+                    
+                    console.log('Card updated:', cardId);
+                })
+                .catch(error => {
+                    console.error('Error updating card:', error);
+                    alert('Error updating card. Please try again.');
+                });
+        }
+        
+        function deleteRFIDCard() {
+            const cardId = selectCardToEdit.value;
+            
+            if (!cardId) return;
+            
+            if (!confirm(`Are you sure you want to delete card ${cardId}? This action cannot be undone.`)) {
+                return;
+            }
+            
+            database.ref('rfidCards/' + cardId).remove()
+                .then(() => {
+                    alert(`Card ${cardId} has been deleted.`);
+                    editCardForm.style.display = 'none';
+                    selectCardToEdit.value = '';
+                    
+                    console.log('Card deleted:', cardId);
+                })
+                .catch(error => {
+                    console.error('Error deleting card:', error);
+                    alert('Error deleting card. Please try again.');
+                });
+        }
+        
+        function loadCardForBalance() {
+            const cardId = this.value;
+            
+            if (!cardId) {
+                balanceCardInfo.style.display = 'none';
+                return;
+            }
+            
+            const card = rfidCards[cardId];
+            if (card) {
+                balanceCardId.textContent = cardId;
+                balanceCardHolder.textContent = card.holder;
+                balanceCardType.textContent = (card.type || 'regular').toUpperCase();
+                balanceCardStatus.textContent = (card.status || 'active').toUpperCase();
+                balanceCardStatus.className = `rfid-card-status ${card.status === 'active' ? 'status-active' : 'status-inactive'}`;
+                currentBalanceDisplay.textContent = parseFloat(card.balance || 0).toFixed(2);
+                balanceCardInfo.style.display = 'block';
+            }
+        }
+        
+        function addBalanceToCard() {
+            const cardId = selectCardForBalance.value;
+            const amount = parseFloat(addAmountInput.value);
+            const notes = transactionNotesInput.value.trim();
+            
+            if (!cardId || isNaN(amount) || amount < 100) {
+                alert('Please select a card and enter a valid amount (minimum ₱100).');
+                return;
+            }
+            
+            const card = rfidCards[cardId];
+            if (!card) return;
+            
+            const currentBalanceValue = parseFloat(card.balance || 0);
+            const newBalance = currentBalanceValue + amount;
+            
+            // Update balance in Firebase
+            database.ref('rfidCards/' + cardId).update({
+                balance: newBalance
+            }).then(() => {
+                // Record transaction
+                const transactionId = database.ref('transactions').push().key;
+                const transaction = {
+                    id: transactionId,
+                    type: 'balance_added',
+                    cardId: cardId,
+                    cardHolder: card.holder,
+                    amount: amount,
+                    timestamp: new Date().toISOString(),
+                    newBalance: newBalance,
+                    notes: notes || 'Balance added by admin',
+                    status: 'success'
+                };
+                
+                database.ref('transactions/' + transactionId).set(transaction);
+                
+                // Show success message
+                balanceSuccessMessage.style.display = 'block';
+                setTimeout(() => {
+                    balanceSuccessMessage.style.display = 'none';
+                }, 3000);
+                
+                // Update displayed balance
+                currentBalanceDisplay.textContent = newBalance.toFixed(2);
+                
+                // Reset form
+                addAmountInput.value = '500';
+                transactionNotesInput.value = '';
+                
+                console.log(`Balance added to card ${cardId}: ₱${amount}. New balance: ₱${newBalance}`);
+            }).catch(error => {
+                console.error('Error adding balance:', error);
+                alert('Error adding balance. Please try again.');
+            });
+        }
+        
+        // ====== TRANSACTIONS FUNCTIONS ======
+        function updateTransactionsLog() {
+            if (!transactionsLog) return;
+            
+            transactionsLog.innerHTML = '';
+            
+            let transactionsArray = Object.values(transactions);
+            
+            // Sort by timestamp (newest first)
+            transactionsArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            if (transactionsArray.length === 0) {
+                transactionsLog.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <i class="fas fa-history fa-3x" style="margin-bottom: 20px;"></i>
+                        <p>No transactions recorded yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Display transactions
+            transactionsArray.forEach(transaction => {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                
+                const time = new Date(transaction.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const date = new Date(transaction.timestamp).toLocaleDateString();
+                
+                let logContent = '';
+                let typeIcon = '';
+                let typeColor = '';
+                
+                if (transaction.type === 'rfid') {
+                    typeIcon = '<i class="fas fa-id-card"></i>';
+                    typeColor = '#10b981';
+                    logContent = `
+                        <div class="log-time">${date} ${time}</div>
+                        <div>${typeIcon} <strong>RFID Payment</strong> - Card: ${transaction.cardId} (${transaction.cardHolder})</div>
+                        <div>Amount: ₱${transaction.amount}, New Balance: ₱${transaction.newBalance}</div>
+                    `;
+                } else if (transaction.type === 'cash') {
+                    typeIcon = '<i class="fas fa-money-bill-wave"></i>';
+                    typeColor = '#3b82f6';
+                    logContent = `
+                        <div class="log-time">${date} ${time}</div>
+                        <div>${typeIcon} <strong>Cash Payment</strong></div>
+                        <div>Paid: ₱${transaction.amountPaid}, Change: ₱${transaction.change}</div>
+                    `;
+                } else if (transaction.type === 'balance_added') {
+                    typeIcon = '<i class="fas fa-plus-circle"></i>';
+                    typeColor = '#8b5cf6';
+                    logContent = `
+                        <div class="log-time">${date} ${time}</div>
+                        <div>${typeIcon} <strong>Balance Added</strong> - Card: ${transaction.cardId}</div>
+                        <div>Amount: ₱${transaction.amount}, New Balance: ₱${transaction.newBalance}</div>
+                        ${transaction.notes ? `<div>Notes: ${transaction.notes}</div>` : ''}
+                    `;
+                }
+                
+                logEntry.innerHTML = logContent;
+                logEntry.style.borderLeft = `4px solid ${typeColor}`;
+                logEntry.style.paddingLeft = '12px';
+                transactionsLog.appendChild(logEntry);
+            });
+        }
+        
+        function clearAllTransactions() {
+            if (confirm('Are you sure you want to clear ALL transaction history? This cannot be undone.')) {
+                database.ref('transactions').remove()
+                    .then(() => {
+                        alert('All transactions have been cleared.');
+                    })
+                    .catch(error => {
+                        console.error('Error clearing transactions:', error);
+                        alert('Error clearing transactions.');
+                    });
+            }
+        }
+        
+        // ====== SAMPLE DATA FUNCTIONS ======
+        function addSampleRFIDCards() {
+            const sampleCards = {
+                'A3F5892C': {
+                    holder: 'Juan Dela Cruz',
+                    email: 'juan.delacruz@email.com',
+                    balance: 500,
+                    type: 'regular',
+                    status: 'active',
+                    vehicle: 'Toyota Innova, Plate No: ABC 123',
+                    dateCreated: new Date().toISOString()
+                },
+                'B7E491D5': {
+                    holder: 'Maria Santos',
+                    email: 'maria.santos@email.com',
+                    balance: 1000,
+                    type: 'premium',
+                    status: 'active',
+                    vehicle: 'Honda Civic, Plate No: XYZ 789',
+                    dateCreated: new Date().toISOString()
+                },
+                'C2A893F1': {
+                    holder: 'Pedro Reyes',
+                    email: 'pedro.reyes@email.com',
+                    balance: 250,
+                    type: 'regular',
+                    status: 'active',
+                    vehicle: 'Mitsubishi Montero, Plate No: DEF 456',
+                    dateCreated: new Date().toISOString()
+                }
+            };
+            
+            database.ref('rfidCards').set(sampleCards)
+                .then(() => {
+                    console.log('Sample RFID cards added');
+                })
+                .catch(error => {
+                    console.error('Error adding sample cards:', error);
+                });
+        }
+        
+        function addSampleTransactions() {
+            const sampleTransactions = {
+                'txn1': {
+                    id: 'txn1',
+                    type: 'rfid',
+                    cardId: 'A3F5892C',
+                    cardHolder: 'Juan Dela Cruz',
+                    amount: 156,
+                    timestamp: new Date(Date.now() - 3600000).toISOString(),
+                    newBalance: 344,
+                    status: 'success'
+                },
+                'txn2': {
+                    id: 'txn2',
+                    type: 'cash',
+                    amountPaid: 200,
+                    change: 44,
+                    timestamp: new Date(Date.now() - 7200000).toISOString(),
+                    status: 'success'
+                }
+            };
+            
+            // Add sample transactions if none exist
+            if (Object.keys(transactions).length === 0) {
+                database.ref('transactions').set(sampleTransactions)
+                    .then(() => {
+                        console.log('Sample transactions added');
+                        alert('Sample transactions have been added.');
+                    })
+                    .catch(error => {
+                        console.error('Error adding sample transactions:', error);
+                    });
+            } else {
+                alert('Transactions already exist. Clear them first if you want to add samples.');
+            }
+        }
+        
+        // ====== TAB NAVIGATION ======
+        function setupTabNavigation() {
+            // Main tabs
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabBtns.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // Admin tabs
+            adminTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-admin-tab');
+                    
+                    // Update active tab
+                    adminTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    adminTabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+        
+        // ====== INITIALIZE APPLICATION ======
+        function initializeApp() {
+            console.log('Initializing Tollgate System...');
+            
+            // Get DOM elements
+            firebaseStatus = document.getElementById('firebaseStatus');
+            statusIcon = document.getElementById('statusIcon');
+            statusText = document.getElementById('statusText');
+            userEmail = document.getElementById('userEmail');
+            logoutBtn = document.getElementById('logoutBtn');
+            
+            tabBtns = document.querySelectorAll('.tab-btn');
+            tabContents = document.querySelectorAll('.tab-content');
+            adminTabs = document.querySelectorAll('.admin-tab');
+            adminTabContents = document.querySelectorAll('.admin-tab-content');
+            
+            rfidGateIndicator = document.getElementById('rfidGateIndicator');
+            cashGateIndicator = document.getElementById('cashGateIndicator');
+            rfidCardInput = document.getElementById('rfidCardInput');
+            scanRFIDBtn = document.getElementById('scanRFIDBtn');
+            cardInfoMessage = document.getElementById('cardInfoMessage');
+            cardInfoContent = document.getElementById('cardInfoContent');
+            processRFIDBtn = document.getElementById('processRFIDBtn');
+            rfidSuccessMessage = document.getElementById('rfidSuccessMessage');
+            rfidErrorMessage = document.getElementById('rfidErrorMessage');
+            errorText = document.getElementById('errorText');
+            cashAmount = document.getElementById('cashAmount');
+            processCashBtn = document.getElementById('processCashBtn');
+            cashReceipt = document.getElementById('cashReceipt');
+            amountPaidDisplay = document.getElementById('amountPaidDisplay');
+            changeDisplay = document.getElementById('changeDisplay');
+            
+            totalCardsElement = document.getElementById('totalCards');
+            totalBalanceElement = document.getElementById('totalBalance');
+            activeCardsElement = document.getElementById('activeCards');
+            blockedCardsElement = document.getElementById('blockedCards');
+            cardsListContainer = document.getElementById('cardsListContainer');
+            searchCardsInput = document.getElementById('searchCards');
+            generateCardIdBtn = document.getElementById('generateCardId');
+            newCardIdInput = document.getElementById('newCardId');
+            cardHolderInput = document.getElementById('cardHolder');
+            cardEmailInput = document.getElementById('cardEmail');
+            initialBalanceInput = document.getElementById('initialBalance');
+            cardTypeSelect = document.getElementById('cardType');
+            vehicleInfoInput = document.getElementById('vehicleInfo');
+            addCardBtn = document.getElementById('addCardBtn');
+            addSuccessMessage = document.getElementById('addSuccessMessage');
+            selectCardToEdit = document.getElementById('selectCardToEdit');
+            editCardForm = document.getElementById('editCardForm');
+            editCardHolder = document.getElementById('editCardHolder');
+            editCardEmail = document.getElementById('editCardEmail');
+            editCardType = document.getElementById('editCardType');
+            editCardStatus = document.getElementById('editCardStatus');
+            editVehicleInfo = document.getElementById('editVehicleInfo');
+            updateCardBtn = document.getElementById('updateCardBtn');
+            deleteCardBtn = document.getElementById('deleteCardBtn');
+            editSuccessMessage = document.getElementById('editSuccessMessage');
+            selectCardForBalance = document.getElementById('selectCardForBalance');
+            balanceCardInfo = document.getElementById('balanceCardInfo');
+            balanceCardType = document.getElementById('balanceCardType');
+            balanceCardStatus = document.getElementById('balanceCardStatus');
+            currentBalanceDisplay = document.getElementById('currentBalance');
+            balanceCardId = document.getElementById('balanceCardId');
+            balanceCardHolder = document.getElementById('balanceCardHolder');
+            addAmountInput = document.getElementById('addAmount');
+            transactionNotesInput = document.getElementById('transactionNotes');
+            addBalanceBtn = document.getElementById('addBalanceBtn');
+            balanceSuccessMessage = document.getElementById('balanceSuccessMessage');
+            transactionsLog = document.getElementById('transactionsLog');
+            clearTransactionsBtn = document.getElementById('clearTransactionsBtn');
+            refreshTransactionsBtn = document.getElementById('refreshTransactionsBtn');
+            addSampleTransactionsBtn = document.getElementById('addSampleTransactionsBtn');
+            
+            // Setup authentication
+            setupAuthentication();
+            
+            // Monitor Firebase connection
+            monitorFirebaseConnection();
+            
+            // Setup tab navigation
+            setupTabNavigation();
+            
+            // Setup RFID handlers
+            setupRFIDHandlers();
+            
+            // Setup admin handlers
+            setupAdminHandlers();
+            
+            console.log('Tollgate System ready!');
+        }
+        
+        // ====== START APPLICATION ======
+        // Wait for DOM to be fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            // DOM already loaded
+            setTimeout(initializeApp, 100);
+        }
+    </script>
+</body>
+</html>
